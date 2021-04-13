@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 ###> symfony/framework-bundle ###
 /.env.local
@@ -14,6 +15,8 @@
 .phpunit.result.cache
 /phpunit.xml
 ###< symfony/phpunit-bridge ###
+=======
+>>>>>>> e5cbc81a4949a70afccecb47fee22fed656cf33a
 # ---> Symfony
 # Cache and logs (Symfony2)
 /app/cache/*
@@ -67,3 +70,7 @@
 
 # Embedded web-server pid file
 /.web-server-pid
+<<<<<<< HEAD
+=======
+
+>>>>>>> e5cbc81a4949a70afccecb47fee22fed656cf33a
