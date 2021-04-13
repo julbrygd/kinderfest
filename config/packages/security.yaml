@@ -45,4 +45,6 @@ security:
         # allow unauthenticated users to access the login form
         - { path: ^/admin/login, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/start, roles: ROLE_ADMIN }
+        - { path: ^/person, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }

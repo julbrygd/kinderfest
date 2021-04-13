@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}StartZeit{% endblock %}
+
+{% block body %}
+    <h1>StartZeit</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ start_zeit.id }}</td>
+            </tr>
+            <tr>
+                <th>Zeit</th>
+                <td>{{ start_zeit.zeit ? start_zeit.zeit|date('H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>Max_personen</th>
+                <td>{{ start_zeit.maxPersonen }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('start_zeit_index') }}">back to list</a>
+
+    <a href="{{ path('start_zeit_edit', {'id': start_zeit.id}) }}">edit</a>
+
+    {{ include('start_zeit/_delete_form.html.twig') }}
+{% endblock %}

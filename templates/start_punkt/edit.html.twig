@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit StartPunkt{% endblock %}
+
+{% block body %}
+    <h1>Edit StartPunkt</h1>
+
+    {{ include('start_punkt/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('start_punkt_index') }}">back to list</a>
+
+    {{ include('start_punkt/_delete_form.html.twig') }}
+{% endblock %}

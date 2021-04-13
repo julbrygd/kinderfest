@@ -1,0 +1,40 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Kinderfest Postenlauf{% endblock %}
+
+{% block body %}
+
+<div class="example-wrapper">
+    <h1>Posten Lauf</h1>
+    <div class="row">
+        <div class="col s12">
+            <p>
+                Wegen der Corona Pandemie können müssen wir beim Postenlauf leider die Anzahl der Personen pro Posten beschränken.
+                Aus diesem Grund müssen sie sich für einen Start Posten anmelden. Unten sehen sie eine Liste aller Start Posten und den Start Zeiten. Pro Posten und Zeit ist nur eine gewisse Anzahl von Personen die Anmeldung möglich.
+                ...
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        {% for punkt in start_punkt %}
+        <div class="col s6">
+            <div class="row">
+                <div class="col s12"><h4>{{ punkt.name }}</h4></div>
+                <div class="col s12">
+                    {% for zeit in start_zeiten %}
+                    <div class="row">
+                        <div class="col s4">Start Zeit {{ zeit.zeit|date('H:i') }}</div>
+                        <div class="col s4">0 von {{ zeit.maxPersonen }} Personen</div>
+                        <div class="col s4">Anmelden</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="col s12">
+                    {{ punkt.iframe |raw }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}StartPunkt{% endblock %}
+
+{% block body %}
+    <h1>StartPunkt</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ start_punkt.id }}</td>
+            </tr>
+            <tr>
+                <th>Name</th>
+                <td>{{ start_punkt.name }}</td>
+            </tr>
+            <tr>
+                <th>Long</th>
+                <td>{{ start_punkt.long }}</td>
+            </tr>
+            <tr>
+                <th>Lat</th>
+                <td>{{ start_punkt.lat }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('start_punkt_index') }}">back to list</a>
+
+    <a href="{{ path('start_punkt_edit', {'id': start_punkt.id}) }}">edit</a>
+
+    {{ include('start_punkt/_delete_form.html.twig') }}
+{% endblock %}

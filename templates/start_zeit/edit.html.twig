@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit StartZeit{% endblock %}
+
+{% block body %}
+    <h1>Edit StartZeit</h1>
+
+    {{ include('start_zeit/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('start_zeit_index') }}">back to list</a>
+
+    {{ include('start_zeit/_delete_form.html.twig') }}
+{% endblock %}

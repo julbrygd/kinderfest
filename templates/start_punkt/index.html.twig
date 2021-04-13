@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}StartPunkt index{% endblock %}
+
+{% block body %}
+    <h1>StartPunkt index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Iframe Link</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for start_punkt in start_punkts %}
+            <tr>
+                <td>{{ start_punkt.id }}</td>
+                <td>{{ start_punkt.name }}</td>
+                <td>{{ start_punkt.iframe }}</td>
+                <td>
+                    <a href="{{ path('start_punkt_show', {'id': start_punkt.id}) }}">show</a>
+                    <a href="{{ path('start_punkt_edit', {'id': start_punkt.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('start_punkt_new') }}">Create new</a>
+{% endblock %}
