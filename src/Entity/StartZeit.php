@@ -34,9 +34,15 @@ class StartZeit
      */
     private $people;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Registration::class, mappedBy="startZeit")
+     */
+    private $registrations;
+
     public function __construct()
     {
         $this->people = new ArrayCollection();
+        $this->registrations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -92,6 +98,36 @@ class StartZeit
             // set the owning side to null (unless already changed)
             if ($person->getStartZeit() === $this) {
                 $person->setStartZeit(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Registration[]
+     */
+    public function getRegistrations(): Collection
+    {
+        return $this->registrations;
+    }
+
+    public function addRegistration(Registration $registration): self
+    {
+        if (!$this->registrations->contains($registration)) {
+            $this->registrations[] = $registration;
+            $registration->setStartZeit($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRegistration(Registration $registration): self
+    {
+        if ($this->registrations->removeElement($registration)) {
+            // set the owning side to null (unless already changed)
+            if ($registration->getStartZeit() === $this) {
+                $registration->setStartZeit(null);
             }
         }
 

@@ -63,6 +63,12 @@ class Person
      */
     private $start_zeit;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Registration::class, inversedBy="persons")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $registration;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -172,6 +178,18 @@ class Person
     public function setStartZeit(?StartZeit $start_zeit): self
     {
         $this->start_zeit = $start_zeit;
+
+        return $this;
+    }
+
+    public function getRegistration(): ?Registration
+    {
+        return $this->registration;
+    }
+
+    public function setRegistration(?Registration $registration): self
+    {
+        $this->registration = $registration;
 
         return $this;
     }

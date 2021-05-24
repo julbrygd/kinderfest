@@ -5,6 +5,8 @@ namespace App\Repository;
 use App\Entity\Person;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Entity\StartZeit;
+use App\Entity\StartPunkt;
 
 /**
  * @method Person|null find($id, $lockMode = null, $lockVersion = null)
@@ -17,6 +19,19 @@ class PersonRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Person::class);
+    }
+
+    /**
+     * @retrun int
+     */
+    public function countPersonForStartZeitAndPunkt(StartZeit $startZeit, StartPunkt $startPunkt){
+        $entityManager = $this->getEntityManager();
+
+        $query = $entityManager->createQuery(
+            "SELECT COUNT(p) as anz FROM App\Entity\Person p
+             WHERE p.start_zeit = :start_zeit AND p.startPunkt = :start_punkt"
+        )->setParameter("start_zeit", $startZeit)->setParameter("start_punkt", $startPunkt);
+        return $query->getSingleResult()["anz"];
     }
 
     // /**

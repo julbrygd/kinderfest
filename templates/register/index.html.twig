@@ -1,0 +1,206 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello RegisterController!{% endblock %}
+
+{% block body %}
+
+<div class="example-wrapper">
+    <h1>Anmelden zum Kinderfest Postenlauf</h1>
+
+    <div class="row">
+        <div class="col s12">
+            <p>Posten: {{ sp.name }} Start Zeit: {{ sz.zeit|date('H:i') }}</p>
+            <p>Frei Pl&auml;tze: <span id="free_space">{{ space }}</span></p>
+            <p>
+            <form>
+                <div class="input-field">
+                    <input class="primaryMail validateMail" placeholder="Best&auml;tigungs E-Mail" id="primaryMail"
+                        type="email" class="validate">
+                    <label for="primaryMail">Best&auml;tigungs E-Mail</label>
+                    <span class="helper-text" data-error="Bitte geben sie eine g&uuml;ltige E-Mail Addresse ein"
+                        data-success="right">
+                        An diese E-Mail Addresse wird ein Bestätungs Mail mit einem Link zum Bearbeiten der Anmeldung
+                        gesendet.
+                    </span>
+                </div>
+            </form>
+            </p>
+        </div>
+        <div class="col s12">
+            <h4>Teilnehmer</h4>
+            <table class="striped responsive-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Vornamen</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                </thead>
+
+                <tbody id="talbeTn">
+                    {% for person in presonen %}
+                    <tr id="tr-{{ person.id }}">
+                        <td>{{ person.name }}</td>
+                        <td>{{ person.preName }}</td>
+                        <td>
+                            <a class="btn-floating btn waves-effect waves-light tooltipped" data-position="bottom" data-tooltip="Bearbeiten">
+                                <i class="material-icons">create</i>
+                            </a>
+                            <a class="btn-floating btn waves-effect waves-light red tooltipped" data-position="bottom" data-tooltip="L&ouml;schen">
+                                <i class="material-icons">delete</i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col s6">
+            <a class="waves-effect waves-light btn modal-trigger" href="#formModal">Teilnehmer hinzuf&uuml;gen</a>
+        </div>
+        <div class="col s6">
+            <a class="waves-effect waves-light btn" id="sendMail">Best&auml;tiguns Mail senden</a>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Structure -->
+<div id="formModal" class="modal">
+    <div class="modal-content">
+        <h4>Teilnehmer hinzuf&uuml;gen oder bearbeiten</h4>
+        <p>
+        <div class="row">
+            <form>
+                <div class="input-field col s6">
+                    <input class="registerForm" placeholder="Nachnamen" id="name" type="text" class="validate">
+                    <label for="name">Nachnamen</label>
+                </div>
+                <div class="input-field col s6">
+                    <input class="registerForm" placeholder="Vornamen" id="pre_name" type="text" class="validate">
+                    <label for="pre_name">Vornamen</label>
+                </div>
+                <div class="input-field col s12">
+                    <input class="registerForm" placeholder="Strasse und Hausnummer" id="addres" type="text"
+                        class="validate">
+                    <label for="address">Strasse und Hausnummer</label>
+                </div>
+                <div class="input-field col s2">
+                    <input class="registerForm" placeholder="Postleizahl" id="plz" type="number" class="validate">
+                    <label for="plz">Postleitzahl</label>
+                </div>
+                <div class="input-field col s10">
+                    <input class="registerForm" placeholder="Ort" id="ort" type="text" class="validate">
+                    <label for="ort">Ort</label>
+                </div>
+                <div class="input-field col s12">
+                    <input class="registerForm validateMail" placeholder="E-Mail Adresse" id="email" type="email"
+                        class="validate">
+                    <label for="email">E-Mail Adresse</label>
+                    <span class="helper-text" data-error="Bitte geben sie eine g&uuml;ltige E-Mail Addresse ein"
+                        data-success="right"></span>
+                </div>
+                <div class="input-field col s12">
+                    <input class="registerForm" placeholder="Telefonnummer" id="tel" type="tel" class="validate">
+                    <label for="tel">Telefonnummer</label>
+                </div>
+                <input class="registerForm" id="uuid" value="{{ uuid }}" type="hidden" />
+                <input class="registerForm" id="sz" value="{{ sz.id }}" type="hidden" />
+                <input class="registerForm" id="sp" value="{{ sp.id }}" type="hidden" />
+            </form>
+        </div>
+        </p>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" id="formClose" class="waves-effect waves-green btn-flat">Schliessen</a>
+        <a href="#!" id="formSave" class="waves-effect waves-green btn-flat">Speichern</a>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script type="text/javascript">
+
+    function validateMailText(email) {
+        var validRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+
+        return email.match(validRegex);
+    }
+
+    function validateMail(e) {
+        $ = jQuery;
+        elem = $(e)
+        value = elem.val();
+        if (!validateMailText(value)) {
+            elem.addClass("invalid");
+        } else {
+            elem.removeClass("invalid");
+        }
+    }
+
+    function clearForm() {
+        $ = jQuery;
+        var ignoreFields = ["uuid", "sz", "sp"]
+        $(".registerForm").each(function (i, e) {
+            var elem = $(e);
+            if (!ignoreFields.includes(elem.attr("id"))) {
+                elem.val("");
+            }
+        });
+    }
+
+    function closeForm(clear = false) {
+        var modal = M.Modal.getInstance($("#formModal"));
+        modal.close();
+        if (clear) {
+            clearForm();
+        }
+    }
+
+    function formSave() {
+        $ = jQuery;
+        var data = {};
+        $(".registerForm").each(function (i, e) {
+            var elem = $(e);
+            var name = elem.attr("id");
+            data[name] = elem.val();
+        });
+        console.log(JSON.stringify(data));
+        $.ajax(
+            "{{ save_url }}",
+            {
+                "method": "POST",
+                "data": JSON.stringify(data),
+                "contentType": "application/json",
+                "success": function(retData) {
+                    if(retData["success"]){
+                        window.location.reload();
+                        var id = retData["data"]["id"];
+                        var tr = $("<tr>").attr("id", "tr-"+id);
+                        tr.append($("<td>").html(data["name"]));
+                        tr.append($("<td>").html(data["pre_name"]));
+                        tr.append($("<td>").html("&nbsp;"));
+                        $("#talbeTn").append(tr);
+                        closeForm(true);
+                    };
+                }
+            }
+        );
+    }
+
+    (function ($) {
+        $(function () {
+            $('.modal').modal();
+            $('.tooltipped').tooltip();
+            $("#formSave").on("click", formSave);
+            $("#formClose").on("click", function () { closeForm(true) });
+            $('.validateMail').on("change", function () { validateMail(this) });
+            window.setInterval(function () {
+                $.getJSON('{{ refresh_url }}', function (data) {
+                    $('#free_space').html(data["free"]);
+                });
+            }, 5000);
+        }); // end of document ready
+    })(jQuery)
+</script>
+{% endblock %}
