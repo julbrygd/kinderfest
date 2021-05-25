@@ -24,8 +24,8 @@
                     {% for zeit in start_zeiten %}
                     <div class="row">
                         <div class="col s4">Start Zeit {{ zeit.zeit|date('H:i') }}</div>
-                        <div class="col s4">{{ persons[punkt.id][zeit.id] }} von {{ zeit.maxPersonen }} Personen</div>
-                        <div class="col s4">Anmelden</div>
+                        <div class="col s4">Frei Pl&auml;tze: {{ zeit.maxPersonen - persons[punkt.id][zeit.id] }}</div>
+                        <div class="col s4"><a href="{{ url('register-sp-sz', {spId: punkt.id, szId: zeit.id}) }}">Anmelden</a></div>
                     </div>
                     {% endfor %}
                 </div>
