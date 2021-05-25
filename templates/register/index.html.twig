@@ -40,13 +40,15 @@
                 <tbody id="talbeTn">
                     {% for person in presonen %}
                     <tr id="tr-{{ person.id }}">
-                        <td>{{ person.name }}</td>
-                        <td>{{ person.preName }}</td>
+                        <td id="name-{{ person.id }}">{{ person.name }}</td>
+                        <td id="prename-{{ person.id }}">{{ person.preName }}</td>
                         <td>
+                            {#
                             <a class="btn-floating btn waves-effect waves-light tooltipped" data-position="bottom" data-tooltip="Bearbeiten">
                                 <i class="material-icons">create</i>
                             </a>
-                            <a class="btn-floating btn waves-effect waves-light red tooltipped" data-position="bottom" data-tooltip="L&ouml;schen">
+                            #}
+                            <a class="btn-floating btn waves-effect waves-light red tooltipped btnDelete" data-id="{{ person.id }}" data-position="bottom" data-tooltip="L&ouml;schen">
                                 <i class="material-icons">delete</i>
                             </a>
                         </td>
@@ -61,6 +63,19 @@
         <div class="col s6">
             <a class="waves-effect waves-light btn" id="sendMail">Best&auml;tiguns Mail senden</a>
         </div>
+    </div>
+</div>
+
+<!-- Modal Structure -->
+<div id="askModal" class="modal">
+    <div class="modal-content">
+        <h4>Teilnehmer L&ouml;schen</h4>
+        <p id="deleteQuery">
+        </p>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" id="askClose" class="waves-effect waves-green btn-flat">Nein</a>
+        <a href="#!" id="deleteUser" class="waves-effect waves-green btn-flat">Ja</a>
     </div>
 </div>
 
@@ -125,6 +140,43 @@
         var validRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 
         return email.match(validRegex);
+    }
+
+    function askDelete(elem){
+        var id = $(elem).data("id");
+        var name = $("#name-"+id).html();
+        var prename = $("#prename-"+id).html();
+        MaterialDialog.dialog(
+            "Sind sie sicher, dass sie den Teilnehmer "+ prename +" " + name + " l&ouml;schen wollen?",
+            {
+                title:"Dialog Title",
+                modalType:"modal-fixed-footer", // Can be empty, modal-fixed-footer or bottom-sheet
+                buttons:{
+                    // Use by default close and confirm buttons
+                    close:{
+                        text:"Nein"
+                    },
+                    confirm:{
+                        text:"Ja",
+                        callback:function(){
+                            $.ajax(
+                                "{{ delete_url }}",
+                                {
+                                    "method": "DELETE",
+                                    "data": JSON.stringify({"id": id}),
+                                    "contentType": "application/json",
+                                    "success": function(retData) {
+                                        if(retData["success"]) {
+                                            window.location.reload();
+                                        }
+                                    }
+                                }
+                            );
+                        }
+                    }
+                }
+            }
+        );
     }
 
     function validateMail(e) {
@@ -193,7 +245,8 @@
             $('.modal').modal();
             $('.tooltipped').tooltip();
             $("#formSave").on("click", formSave);
-            $("#formClose").on("click", function () { closeForm(true) });
+            $("#formClose").on("click", function() { closeForm(true) });
+            $(".btnDelete").on("click", function() { askDelete(this) });
             $('.validateMail').on("change", function () { validateMail(this) });
             window.setInterval(function () {
                 $.getJSON('{{ refresh_url }}', function (data) {

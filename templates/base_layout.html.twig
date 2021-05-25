@@ -20,6 +20,8 @@
         {% if is_granted('ROLE_USER') %}
         <li><a href="{{ url('app_logout') }}">Logout</a></li>
         {% else %}
+        <li><a href="{{ url('start_punkt_index') }}">Start Punkte</a></li>
+        <li><a href="{{ url('start_zeit_index') }}">Start Zeit</a></li>
         <li><a href="{{ url('app_login') }}">Login</a></li>
         {% endif %}
       </ul>
@@ -44,6 +46,7 @@
   <!--  Scripts-->
   <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
   <script src="/js/materialize.js"></script>
+  <script src="/js/material-dialog.min.js"></script>
   <script src="/js/init.js"></script>
   {% block scripts %}{% endblock %}
   </body>

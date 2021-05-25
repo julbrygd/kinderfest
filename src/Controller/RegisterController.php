@@ -16,9 +16,18 @@ use App\Form\RegisterType;
 use App\Entity\Registration;
 use App\Repository\RegistrationRepository;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class RegisterController extends AbstractController
 {
+
+    private $session;
+
+    public function __construct(SessionInterface $session)
+    {
+        $this->session = $session;
+    }
+
     /**
      * @Route("/register", name="register")
      */
@@ -73,6 +82,8 @@ class RegisterController extends AbstractController
         $person->setStartPunkt($sp)->setStartZeit($sz);
         $max = $sz->getMaxPersonen();
         $users = $personRepo->countPersonForStartZeitAndPunkt($sz, $sp);
+        $nonce =  $this->session->get("regNonce", md5(random_bytes(32)));
+        $this->session->set("regNonce", $nonce);
         return $this->render('register/index.html.twig', [
             'sp' => $sp,
             'sz' => $sz,
@@ -80,7 +91,8 @@ class RegisterController extends AbstractController
             'refresh_url' => $this->generateUrl('space-sp-sz', ['spId' => $sp->getId(), 'szId' => $sz->getId()]),
             'save_url' => $this->generateUrl('register-save', ['uuid' => $uuid]),
             'uuid' => $uuid,
-            'presonen' => $reg->getPersons()
+            'presonen' => $reg->getPersons(),
+            'delete_url' => $this->generateUrl('register-delete', ['uuid' => $uuid, 'nonce' => $nonce])
         ]);
     }
 
@@ -125,6 +137,46 @@ class RegisterController extends AbstractController
                     "success"=> true,
                     "data" => $personData
                 ]);
+            }
+        }
+    }
+
+    /**
+     * @Route("/register/delete/{uuid}/{nonce}", name="register-delete", requirements={"uuid"="\w+", "nonce"="\w+"}, methods={"DELETE"})
+     */
+    public function deleteUser(string $uuid, string $nonce, PersonRepository $repo, Request $req) {
+        if ($req->isXmlHttpRequest()) {
+            $personData = [];
+            if ($content = $req->getContent()) {
+                $personData = json_decode($content, true);
+                $person = $repo->find($personData["id"]);
+                $savedNonce = $this->session->get("regNonce");
+                if($person == null) {
+                    return $this->json(array(
+                        "success" => false,
+                        "msg" => "Person with id "+$personData["id"]+" not fund!"
+                    ));
+                } else if($person->getRegistration()->getUuid()->toBase32() != $uuid) {
+                    return $this->json(array(
+                        "success" => false,
+                        "msg" => "The uuids do not match!",
+                        "person" => $person->getRegistration()->getUuid()->toBase32()
+                    ));
+                }else if($nonce != $savedNonce) {
+                    return $this->json(array(
+                        "success" => false,
+                        "msg" => "Bitte laden sie die Seite neu, die Sicherheits nummer ist ungültig!",
+                        "nonce" => $this->session->get("regNonce"),
+                        "nonce_send" => $nonce
+                    ));
+                }
+                $entityManager = $this->getDoctrine()->getManager();
+                $entityManager->remove($person);
+                $entityManager->flush();
+                $this->session->set("regNonce", NULL);
+                return $this->json(array(
+                    "success" => true
+                ));
             }
         }
     }
