@@ -82,8 +82,6 @@ class RegisterController extends AbstractController
         $person->setStartPunkt($sp)->setStartZeit($sz);
         $max = $sz->getMaxPersonen();
         $users = $personRepo->countPersonForStartZeitAndPunkt($sz, $sp);
-        $nonce =  $this->session->get("regNonce", md5(random_bytes(32)));
-        $this->session->set("regNonce", $nonce);
         return $this->render('register/index.html.twig', [
             'sp' => $sp,
             'sz' => $sz,
@@ -92,7 +90,7 @@ class RegisterController extends AbstractController
             'save_url' => $this->generateUrl('register-save', ['uuid' => $uuid]),
             'uuid' => $uuid,
             'presonen' => $reg->getPersons(),
-            'delete_url' => $this->generateUrl('register-delete', ['uuid' => $uuid, 'nonce' => $nonce])
+            'delete_url' => $this->generateUrl('register-delete', ['uuid' => $uuid])
         ]);
     }
 
@@ -142,15 +140,15 @@ class RegisterController extends AbstractController
     }
 
     /**
-     * @Route("/register/delete/{uuid}/{nonce}", name="register-delete", requirements={"uuid"="\w+", "nonce"="\w+"}, methods={"DELETE"})
+     * @Route("/register/delete/{uuid}", name="register-delete", requirements={"uuid"="\w+"}, methods={"DELETE"})
      */
-    public function deleteUser(string $uuid, string $nonce, PersonRepository $repo, Request $req) {
+    public function deleteUser(string $uuid, PersonRepository $repo, Request $req) {
         if ($req->isXmlHttpRequest()) {
             $personData = [];
             if ($content = $req->getContent()) {
                 $personData = json_decode($content, true);
                 $person = $repo->find($personData["id"]);
-                $savedNonce = $this->session->get("regNonce");
+                $csrf = $personData["token"];
                 if($person == null) {
                     return $this->json(array(
                         "success" => false,
@@ -162,12 +160,10 @@ class RegisterController extends AbstractController
                         "msg" => "The uuids do not match!",
                         "person" => $person->getRegistration()->getUuid()->toBase32()
                     ));
-                }else if($nonce != $savedNonce) {
+                }else if(!$this->isCsrfTokenValid('delete-item',$csrf)) {
                     return $this->json(array(
                         "success" => false,
-                        "msg" => "Bitte laden sie die Seite neu, die Sicherheits nummer ist ungültig!",
-                        "nonce" => $this->session->get("regNonce"),
-                        "nonce_send" => $nonce
+                        "msg" => "Bitte laden sie die Seite neu, die Sicherheits nummer ist ungültig!"
                     ));
                 }
                 $entityManager = $this->getDoctrine()->getManager();

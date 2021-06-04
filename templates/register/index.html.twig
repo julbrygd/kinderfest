@@ -163,7 +163,7 @@
                                 "{{ delete_url }}",
                                 {
                                     "method": "DELETE",
-                                    "data": JSON.stringify({"id": id}),
+                                    "data": JSON.stringify({"id": id, "token": "{{ csrf_token('delete-item') }}"}),
                                     "contentType": "application/json",
                                     "success": function(retData) {
                                         if(retData["success"]) {
