@@ -253,6 +253,18 @@
                     $('#free_space').html(data["free"]);
                 });
             }, 5000);
+
+            $("#sendMail").on("click", function(){
+                var data = {"mail": $("#primaryMail").val(), "uuid": "{{ uuid }}"};
+                $.ajax(
+                    "{{ url('register-sendmail', {'csrf': csrf_token('sendmail')}) }}",
+                    {
+                        "method": "POST",
+                        "data": JSON.stringify(data),
+                        "contentType": "application/json"
+                    }
+                );
+            });
         }); // end of document ready
     })(jQuery)
 </script>

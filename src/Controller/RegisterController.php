@@ -143,7 +143,7 @@ class RegisterController extends AbstractController
     }
 
     /**
-     * @Route("/register/sendmail/{csrf}, name="register-sendmail",  requirements={"uuid"="\w+"}, methods={"POST"})
+     * @Route("/register/sendmail/{csrf}", name="register-sendmail",  requirements={"uuid"="\w+"}, methods={"POST"})
      */
     public function sendMail(string $csrf, MailerInterface $mailer, Request $req) {
         if($this->isCsrfTokenValid("sendmail", $csrf)){           
@@ -154,12 +154,21 @@ class RegisterController extends AbstractController
                     ->to($mailData["mail"])
                     ->subject("Anmeldung Kinderfest Birsfelden 2021")
                     ->htmlTemplate('register/mail.html.twig')
+                    ->context($mailData)
                     ->getHeaders()
                         // this header tells auto-repliers ("email holiday mode") to not
                         // reply to this message because it's an automated email
                         ->addTextHeader('X-Auto-Response-Suppress', 'OOF, DR, RN, NRN, AutoReply');
                 $mailer->send($mail);
+                return $this->json(array(
+                    "sucess" => true
+                ));
             }
+        } else {
+            return $this->json(array(
+                "success" => false,
+                "msg" => "Error csrf token not valid"
+            ));
         }
     }
 
