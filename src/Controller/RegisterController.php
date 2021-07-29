@@ -20,6 +20,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+
 
 class RegisterController extends AbstractController
 {
@@ -145,12 +148,12 @@ class RegisterController extends AbstractController
     /**
      * @Route("/register/sendmail/{csrf}", name="register-sendmail",  requirements={"uuid"="\w+"}, methods={"POST"})
      */
-    public function sendMail(string $csrf, MailerInterface $mailer, Request $req) {
+    public function sendMail(string $csrf, MailerInterface $mailer, Request $req, LoggerInterface $log) {
         if($this->isCsrfTokenValid("sendmail", $csrf)){           
             if ($content = $req->getContent()) {
                 $mailData = json_decode($content, true);
                 $mail = new TemplatedEmail();
-                $mail->from("noreplay@conrad.pics")
+                $mail->from("kinderfest@conrad.pics")
                     ->to($mailData["mail"])
                     ->subject("Anmeldung Kinderfest Birsfelden 2021")
                     ->htmlTemplate('register/mail.html.twig')
@@ -159,7 +162,11 @@ class RegisterController extends AbstractController
                         // this header tells auto-repliers ("email holiday mode") to not
                         // reply to this message because it's an automated email
                         ->addTextHeader('X-Auto-Response-Suppress', 'OOF, DR, RN, NRN, AutoReply');
-                $mailer->send($mail);
+                try {
+                    $mailer->send($mail);
+                } catch (TransportExceptionInterface $e) {
+                    $log->error("Error sending mail", array("exception"=>$e));
+                }
                 return $this->json(array(
                     "sucess" => true
                 ));
