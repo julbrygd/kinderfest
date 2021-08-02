@@ -125,7 +125,7 @@ class RegisterController extends AbstractController
                 if ($personRepo->checkIfPersonRegistered($personData["pre_name"], $personData["name"], $personData["addres"], $personData["plz"])){
                     return $this->json([
                         "success" => false,
-                        "msg" => $personData["pre_name"] . " " . $personData["name"] . " ist schon angemelden, eine doppel Anmeldung ist nich erlaubt"
+                        "msg" => $personData["pre_name"] . " " . $personData["name"] . "ist schon angemeldet, eine Doppel Anmeldung ist nicht erlaubt"
                     ]);
                 }
                 $person = new Person();
