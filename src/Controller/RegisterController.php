@@ -119,6 +119,12 @@ class RegisterController extends AbstractController
                         "msg" => "Diese Start Zeit und Start Punkt ist leider schon voll"
                     ]);
                 }
+                if ($personRepo->checkIfPersonRegistered($personData["pre_name"], $personData["name"], $personData["addres"], $personData["plz"])){
+                    return $this->json([
+                        "success" => false,
+                        "msg" => $personData["pre_name"] . " " . $personData["name"] . " ist schon angemelden, eine doppel Anmeldung ist nich erlaubt"
+                    ]);
+                }
                 $person = new Person();
                 $person->setStartZeit($sz)
                     ->setStartPunkt($sp)
@@ -143,7 +149,7 @@ class RegisterController extends AbstractController
     }
 
     /**
-     * @Route("/register/sendmail/{csrf}, name="register-sendmail",  requirements={"uuid"="\w+"}, methods={"POST"})
+     * @Route("/register/sendmail/{csrf}", name="register-sendmail",  requirements={"uuid"="\w+"}, methods={"POST"})
      */
     public function sendMail(string $csrf, MailerInterface $mailer, Request $req) {
         if($this->isCsrfTokenValid("sendmail", $csrf)){           

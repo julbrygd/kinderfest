@@ -22,6 +22,18 @@ class PersonRepository extends ServiceEntityRepository
     }
 
     /**
+     * @retrun boolval
+     */
+    public function checkIfPersonRegistered(string $prename, string $name, string $address, int $plz){
+        $query = $entityManager->createQuery(
+            "SELECT COUNT(p) as anz FROM App\Entity\Person p
+             WHERE p.pre_name = :pre_name AND p.name = :s_name AND p.address = :s_address AND p.plz = :plz"
+        )->setParameter("pre_name", $pre_name)->setParameter("s_name", $name)
+        ->setParameter("s_address", $address)->setParameter("plz", $plz);
+        return $query->getSingleResult()["anz"] >= 1;
+    }
+
+    /**
      * @retrun int
      */
     public function countPersonForStartZeitAndPunkt(StartZeit $startZeit, StartPunkt $startPunkt){
