@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
-  <title>Starter Template - Materialize</title>
+  <title>Kinderfest Anmeldung</title>
 
   <!-- CSS  -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -11,17 +11,17 @@
   <link href="/css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
 </head>
 <body>
-  <nav role="navigation">
-    <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">Kinderfest Postenlauf</a>
+  <nav role="navigation" class="blue darken-2">
+    <div class="nav-wrapper container blue darken-2"><a id="logo-container" href="#" class="brand-logo">Kinderfest: unterwegs mit Jürgen Waschbär</a>
       <ul>
       </ul>
       <ul class="right hide-on-med-and-down">
         <li><a href="/">Home</a></li>
         {% if is_granted('ROLE_USER') %}
-        <li><a href="{{ url('app_logout') }}">Logout</a></li>
-        {% else %}
         <li><a href="{{ url('start_punkt_index') }}">Start Punkte</a></li>
         <li><a href="{{ url('start_zeit_index') }}">Start Zeit</a></li>
+        <li><a href="{{ url('app_logout') }}">Logout</a></li>
+        {% else %}
         <li><a href="{{ url('app_login') }}">Login</a></li>
         {% endif %}
       </ul>
@@ -34,7 +34,7 @@
   </nav>
   {% block main %}{% endblock %}
 
-  <footer class="page-footer">
+  <footer class="page-footer blue darken-2">
     <div class="footer-copyright">
       <div class="container">
       Made by <a class="orange-text text-lighten-3" href="http://materializecss.com">Materialize</a>
