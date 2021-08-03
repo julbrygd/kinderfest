@@ -22,7 +22,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-
+use Symfony\Component\Uid\UuidV4;
 
 class RegisterController extends AbstractController
 {
@@ -64,17 +64,51 @@ class RegisterController extends AbstractController
     /**
      * @Route("/register/{spId}/{szId}", name="register-sp-sz", requirements={"spId"="\d+", "szId"="\d+"})
      */
-    public function register(int $spId, int $szId, StartPunktRepository $spr, StartZeitRepository $szr): Response
+    public function register(int $spId, int $szId, StartPunktRepository $spr, StartZeitRepository $szr, RegistrationRepository $regRepo): Response
     {
-        $uuid = Uuid::v4();
-        $reg = new Registration();
-        $reg->setUuid($uuid->toBase32())
-            ->setStartZeit($szr->find($szId))
-            ->setStartPunk($spr->find($spId));
-        $entityManager = $this->getDoctrine()->getManager();
-        $entityManager->persist($reg);
-        $entityManager->flush();
-        return $this->redirectToRoute("register-edit", ["uuid" => $reg->getUuid()]);
+        $registrations = $this->session->get("registrations", null);
+        var_dump($registrations);
+        $uuid = null;
+        if($registrations != null){
+            if(is_array($registrations) && array_key_exists($spId, $registrations)){
+                $tmp = $registrations[$spId];
+                if(is_array($tmp) && array_key_exists($szId, $tmp)){
+                    $uuid = $tmp[$szId];
+                }
+            }
+        }
+        $reg = null;
+        if($uuid == null){
+            $uuid = Uuid::v4();
+            $reg = new Registration();
+            $reg->setUuid($uuid->toBase32())
+                ->setStartZeit($szr->find($szId))
+                ->setStartPunk($spr->find($spId));
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($reg);
+            $entityManager->flush();
+        } else {
+            $reg = $regRepo->findOneBy(['uuid' => $registrations[$spId][$szId]]);
+        }
+        if(is_array($registrations)){
+            if(array_key_exists($spId, $registrations)){
+                if(!is_array($registrations[$spId])){
+                    $registrations[$spId] = array($szId => $uuid);
+                } else {
+                    $registrations[$spId][$szId] = $reg->getUuid();
+                }
+            } else {
+                $registrations[$spId] = array($szId => $reg->getUuid());
+            }
+            $this->session->set("registrations", $registrations);
+        } else {
+            $this->session->set("registrations", array($spId => array($szId => $reg->getUuid())));
+        }
+        $redirect = $reg->getUuid();
+        if($redirect instanceof UuidV4){
+            $redirect = $reg->getUuid()->toBase32();
+        }
+        return $this->redirectToRoute("register-edit", ["uuid" =>  $redirect]);
     }
     /**
      * @Route("/register/{uuid}", name="register-edit", requirements={"uuid"="\w+"})
