@@ -15,7 +15,7 @@
             <form>
                 <div class="input-field">
                     <input class="primaryMail validateMail" placeholder="Best&auml;tigungs E-Mail" id="primaryMail"
-                        type="email" class="validate">
+                        type="email" class="validate" value="{{ email }}">
                     <label for="primaryMail">Best&auml;tigungs E-Mail</label>
                     <span class="helper-text" data-error="Bitte geben sie eine g&uuml;ltige E-Mail Addresse ein"
                         data-success="right">
@@ -24,6 +24,11 @@
                 </div>
             </form>
             </p>
+        {% if not email %}
+            <p>
+                Die Anmeldung wird erst definitif gespeichert, wenn du dich mit "Jetzt Anmelden" definitiv anmeldest. Die hier eingegebenen Personen werden f&uuml;r 1 Stunde gespeichert und danach automatisch gel&ouml;scht, ohne Anmeldung
+            </p>
+        {% endif %}
         </div>
         <div class="col s12">
             <h4>Teilnehmer</h4>
@@ -60,7 +65,11 @@
             <a class="waves-effect waves-light btn modal-trigger blue darken-2" href="#formModal">Teilnehmer hinzuf&uuml;gen</a>
         </div>
         <div class="col s6">
+            {% if email %}
             <a class="waves-effect waves-light btn blue darken-2" id="sendMail">Best&auml;tigungs-Mail senden</a>
+            {% else %}
+            <a class="waves-effect waves-light btn blue darken-2" id="sendMail">Jezt Anmelden</a>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -256,15 +265,20 @@
             }, 5000);
 
             $("#sendMail").on("click", function(){
-                var data = {"mail": $("#primaryMail").val(), "uuid": "{{ uuid }}"};
-                $.ajax(
-                    "{{ url('register-sendmail', {'csrf': csrf_token('sendmail')}) }}",
-                    {
-                        "method": "POST",
-                        "data": JSON.stringify(data),
-                        "contentType": "application/json"
-                    }
-                );
+                var mail = $("#primaryMail").val();
+                if(mail === ""){
+                    alert("Eine Anmeldung ist nur möglich, wenn sie eine 'Bestätigungs E-Mail' angeben");
+                } else {
+                    var data = {"mail": $("#primaryMail").val(), "uuid": "{{ uuid }}"};
+                    $.ajax(
+                        "{{ url('register-sendmail', {'csrf': csrf_token('sendmail')}) }}",
+                        {
+                            "method": "POST",
+                            "data": JSON.stringify(data),
+                            "contentType": "application/json"
+                        }
+                    );
+                }
             });
         }); // end of document ready
     })(jQuery)

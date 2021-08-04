@@ -11,3 +11,11 @@
 
     {{ include('start_zeit/_delete_form.html.twig') }}
 {% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+  $ = jQuery;
+  $(document).ready(function(){
+    $('select').formSelect();
+  });
+</script>
+{% endblock %}

@@ -9,3 +9,11 @@
 
     <a href="{{ path('start_zeit_index') }}">back to list</a>
 {% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+  $ = jQuery;
+  $(document).ready(function(){
+    $('select').formSelect();
+  });
+</script>
+{% endblock %}

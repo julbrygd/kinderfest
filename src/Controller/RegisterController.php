@@ -61,13 +61,24 @@ class RegisterController extends AbstractController
         ]);
     }
 
+    private function getNewRegistration(int $spId, int $szId, StartPunktRepository $spr, StartZeitRepository $szr): \App\Entity\Registration {
+        $uuid = Uuid::v4();
+        $reg = new Registration();
+        $reg->setUuid($uuid->toBase32())
+            ->setStartZeit($szr->find($szId))
+            ->setStartPunk($spr->find($spId));
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->persist($reg);
+        $entityManager->flush();
+        return $reg;
+    }
+
     /**
      * @Route("/register/{spId}/{szId}", name="register-sp-sz", requirements={"spId"="\d+", "szId"="\d+"})
      */
     public function register(int $spId, int $szId, StartPunktRepository $spr, StartZeitRepository $szr, RegistrationRepository $regRepo): Response
     {
         $registrations = $this->session->get("registrations", null);
-        var_dump($registrations);
         $uuid = null;
         if($registrations != null){
             if(is_array($registrations) && array_key_exists($spId, $registrations)){
@@ -79,16 +90,12 @@ class RegisterController extends AbstractController
         }
         $reg = null;
         if($uuid == null){
-            $uuid = Uuid::v4();
-            $reg = new Registration();
-            $reg->setUuid($uuid->toBase32())
-                ->setStartZeit($szr->find($szId))
-                ->setStartPunk($spr->find($spId));
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($reg);
-            $entityManager->flush();
+            $reg = $this->getNewRegistration($spId, $szId, $spr, $szr);
         } else {
             $reg = $regRepo->findOneBy(['uuid' => $registrations[$spId][$szId]]);
+            if($reg === null){
+                $reg = $this->getNewRegistration($spId, $szId, $spr, $szr);
+            }
         }
         if(is_array($registrations)){
             if(array_key_exists($spId, $registrations)){
@@ -110,6 +117,7 @@ class RegisterController extends AbstractController
         }
         return $this->redirectToRoute("register-edit", ["uuid" =>  $redirect]);
     }
+
     /**
      * @Route("/register/{uuid}", name="register-edit", requirements={"uuid"="\w+"})
      */
@@ -130,7 +138,8 @@ class RegisterController extends AbstractController
             'save_url' => $this->generateUrl('register-save', ['uuid' => $uuid]),
             'uuid' => $uuid,
             'presonen' => $reg->getPersons(),
-            'delete_url' => $this->generateUrl('register-delete', ['uuid' => $uuid])
+            'delete_url' => $this->generateUrl('register-delete', ['uuid' => $uuid]),
+            'email' => $reg->getEmail()
         ]);
     }
 
@@ -188,7 +197,7 @@ class RegisterController extends AbstractController
     /**
      * @Route("/register/sendmail/{csrf}", name="register-sendmail",  requirements={"uuid"="\w+"}, methods={"POST"})
      */
-    public function sendMail(string $csrf, MailerInterface $mailer, Request $req, LoggerInterface $log) {
+    public function sendMail(string $csrf, MailerInterface $mailer, Request $req, LoggerInterface $log, RegistrationRepository $repo) {
         if($this->isCsrfTokenValid("sendmail", $csrf)){           
             if ($content = $req->getContent()) {
                 $mailData = json_decode($content, true);
@@ -204,6 +213,12 @@ class RegisterController extends AbstractController
                         ->addTextHeader('X-Auto-Response-Suppress', 'OOF, DR, RN, NRN, AutoReply');
                 try {
                     $mailer->send($mail);
+                    $reg = $repo->findOneBy(["uuid" => $mailData["uuid"]]);
+                    if($reg !== null){
+                        $reg->setEmail($mailData["mail"]);
+                        $entityManager = $this->getDoctrine()->getManager();
+                        $entityManager->flush();
+                    }
                 } catch (TransportExceptionInterface $e) {
                     $log->error("Error sending mail", array("exception"=>$e));
                 }
@@ -254,5 +269,25 @@ class RegisterController extends AbstractController
                 ));
             }
         }
+    }
+
+    /**
+     * @Route("/register/jobs/clean", name="register-clean")
+     */
+    public function clean(RegistrationRepository $repo): Response
+    {
+        $found = $repo->findBy(["email" => null]);
+        $log = array();
+        $now = new \DateTime();
+        $entityManager = $this->getDoctrine()->getManager();
+        foreach($found as $reg){
+            $diff = abs($now->getTimestamp() - $reg->getUpdated()->getTimestamp());
+            if($diff > 60 * 60){
+                $log[] = "Delete Registration with id " . $reg->getId();
+                $entityManager->remove($reg);
+                $entityManager->flush();
+            }
+        }
+        return $this->render('register/clean.html.twig', ["found" => $found, "log" => $log]);
     }
 }
