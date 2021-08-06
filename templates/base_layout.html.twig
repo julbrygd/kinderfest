@@ -20,6 +20,7 @@
         {% if is_granted('ROLE_USER') %}
         <li><a href="{{ url('start_punkt_index') }}">Start Punkte</a></li>
         <li><a href="{{ url('start_zeit_index') }}">Start Zeit</a></li>
+        <li><a href="{{ url('show_reg') }}">Alle Anmeldungen</a></li>
         <li><a href="{{ url('app_logout') }}">Logout</a></li>
         {% else %}
         <li><a href="{{ url('app_login') }}">Login</a></li>

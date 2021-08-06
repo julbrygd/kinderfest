@@ -49,4 +49,5 @@ security:
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/start, roles: ROLE_ADMIN }
         - { path: ^/person, roles: ROLE_ADMIN }
+        - { path: ^/show/reg, roles: [ROLE_OK, ROLE_ADMIN] }
         # - { path: ^/profile, roles: ROLE_USER }
