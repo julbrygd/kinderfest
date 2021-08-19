@@ -38,4 +38,24 @@ class ShowRegController extends AbstractController
             'data' => $data
         ]);
     }
+
+    #[Route('/show/reg_csv', name: 'show_reg_csv')]
+    public function csv(PersonRepository $personRepo): Response {
+        $data = "Namen;Vornamen;Adresse;PLZ;Ort;Tel;E-Mail Adresse;Start Zeit;Start Punk" . PHP_EOL;
+        foreach($personRepo->findAll() as $person){
+            $data .= $person->getName() . ";";
+            $data .= $person->getPreName() . ";";
+            $data .= $person->getAdresse() . ";";
+            $data .= $person->getPlz() . ";";
+            $data .= $person->getOrt() . ";";
+            $data .= $person->getTel() . ";";
+            $data .= $person->getEmail() . ";";
+            $data .= $person->getStartZeit()->getZeit()->format("H:i") . ";";
+            $data .= $person->getStartPunkt()->getName() . PHP_EOL;
+        }
+        $response = new Response($data);
+        $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Disposition', 'attachment; filename="anmeldungen.csv"');
+        return $response;
+    }
 }
