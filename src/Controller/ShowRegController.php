@@ -15,7 +15,7 @@ class ShowRegController extends AbstractController
     #[Route('/show/reg', name: 'show_reg')]
     public function index(RegistrationRepository $regRepo, StartZeitRepository $szRepo, StartPunktRepository $spRepo): Response
     {
-
+        $mails = array();
         $data = array();
         $zeiten = $szRepo->findAll();
         foreach($spRepo->findAll() as $sp){
@@ -32,10 +32,14 @@ class ShowRegController extends AbstractController
         }
         foreach($regRepo->findAll() as $reg){
             $data[$reg->getStartPunk()->getId()]["zeiten"][$reg->getStartZeit()->getId()]["personen"] = $reg->getPersons();
+            foreach($reg->getPersons() as $person){
+                $mails[$person->getEmail()] = true;
+            }
         }
         return $this->render('show_reg/index.html.twig', [
             'controller_name' => 'ShowRegController',
-            'data' => $data
+            'data' => $data,
+            'mails' => implode(";", array_keys($mails))
         ]);
     }
 
