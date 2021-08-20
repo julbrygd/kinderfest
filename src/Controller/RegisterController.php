@@ -202,6 +202,9 @@ class RegisterController extends AbstractController
             if ($content = $req->getContent()) {
                 $mailData = json_decode($content, true);
                 $mail = new TemplatedEmail();
+                $reg = $repo->findOneBy(["uuid" => $mailData["uuid"]]);
+                $mailData["start_punkt"] = $reg->getStartPunk()->getName();
+                $mailData["start_zeit"] = $reg->getStartZeit()->getZeit()->format("H:i");
                 $mail->from("kinderfest@conrad.pics")
                     ->to($mailData["mail"])
                     ->subject("Anmeldung Kinderfest Birsfelden 2021")
