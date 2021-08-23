@@ -12,7 +12,9 @@ use App\Repository\RegistrationRepository;
 
 class ShowRegController extends AbstractController
 {
-    #[Route('/show/reg', name: 'show_reg')]
+    /*
+    * @Route("/show/reg", name="show_reg")
+    */
     public function index(RegistrationRepository $regRepo, StartZeitRepository $szRepo, StartPunktRepository $spRepo): Response
     {
         $mails = array();
@@ -43,7 +45,9 @@ class ShowRegController extends AbstractController
         ]);
     }
 
-    #[Route('/show/reg_csv', name: 'show_reg_csv')]
+    /*
+    * @Route("/show/reg_csv", name="show_reg_csv")
+    */
     public function csv(PersonRepository $personRepo): Response {
         $data = "Namen;Vornamen;Adresse;PLZ;Ort;Tel;E-Mail Adresse;Start Zeit;Start Punk" . PHP_EOL;
         foreach($personRepo->findAll() as $person){
